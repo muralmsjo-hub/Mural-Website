@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model applications {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email       String   @db.VarChar(255)
+  phoneNumber String   @map("phone_number") @db.VarChar(255)
+  major       String?  @db.VarChar(255)
+  cv          String   @db.VarChar(255)
+  careerId    String   @map("career_id") @db.Uuid
+  isShown     Boolean  @default(false) @map("is_shown")
+  appliedAt   DateTime @default(now()) @map("applied_at") @db.Timestamptz(6)
+  firstName   String   @map("first_name") @db.VarChar(255)
+  lastName    String?  @map("last_name") @db.VarChar(255)
+
+  careers careers @relation(fields: [careerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model banners {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nameEn    String    @map("name_en") @db.VarChar(255)
+  nameAr    String    @map("name_ar") @db.VarChar(255)
+  image     String    @db.VarChar(255)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+}
+
+model careers {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  positionEn     String   @map("possition_en") @db.VarChar(255)
+  positionAr     String   @map("possition_ar") @db.VarChar(255)
+  descriptionEn  String   @map("description_en")
+  descriptionAr  String   @map("description_ar")
+  roleEn         String   @map("role_en") @db.VarChar(255)
+  roleAr         String   @map("role_ar") @db.VarChar(255)
+  experienceEn   String   @map("experience_en") @db.VarChar(255)
+  experienceAr   String   @map("experience_ar") @db.VarChar(255)
+  requirementsEn String[] @map("requirements_en")
+  requirementsAr String[] @map("requirements_ar")
+  slug           String   @unique @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  image          String   @db.VarChar(255)
+
+  applications applications[]
+}
+
+model categories {
+  id                    String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  categoryNameEn        String     @unique @map("category_name_en") @db.VarChar(255)
+  categoryNameAr        String     @map("category_name_ar") @db.VarChar(255)
+  categoryDescriptionEn String     @map("category_description_en")
+  categoryDescriptionAr String     @map("category_description_ar")
+  image                 String     @db.VarChar(255)
+  createdAt             DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  isFeatured            Boolean    @default(false) @map("is_featured")
+  slug                  String     @unique @db.VarChar(255)
+  products              products[]
+}
+
+model products {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                 String   @unique @db.VarChar(255)
+  productNameEn        String   @unique @map("product_name_en") @db.VarChar(255)
+  productNameAr        String   @map("product_name_ar") @db.VarChar(255)
+  productDescriptionEn String   @map("product_description_en")
+  productDescriptionAr String   @map("product_description_ar")
+  productCardImage     String   @map("product_card_image") @db.VarChar(255)
+  productImages        String[] @map("product_images")
+  manufacturerNameEN   String   @map("manufacturer_name_en") @db.VarChar(255)
+  manufacturerNameAr   String   @map("manufacturer_name_ar") @db.VarChar(255)
+  manufacturerLogo     String   @map("manufacturer_logo") @db.VarChar(255)
+  categoryId           String   @map("category_id") @db.Uuid
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  isFeatured           Boolean  @default(false) @map("is_featured")
+
+  categories                categories                     @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  purchaseOrderRequestItems purchase_order_request_items[]
+}
+
+model purchase_order_requests {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyName String @map("company_name") @db.VarChar(255)
+  personName  String @map("person_name") @db.VarChar(255)
+  email       String @db.VarChar(255)
+  jobTitle    String @map("job_title") @db.VarChar(255)
+  phoneNumber String @map("phone_number") @db.VarChar(255)
+  city        String @db.VarChar(255)
+  streetName  String @map("street_name") @db.VarChar(255)
+
+  additionalProductRequirements String? @map("additional_product_requirements")
+
+  deliveryCity       String @db.VarChar(255)
+  deliveryStreetName String @map("delivery_street_name") @db.VarChar(255)
+
+  deliveryBuildingNumber String   @map("delivery_building_number") @db.VarChar(255)
+  supportingDocuments    String?  @map("supporting_documents")
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  items purchase_order_request_items[]
+}
+
+model purchase_order_request_items {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  purchaseRequestId String @map("purchase_request_id") @db.Uuid
+  productId         String @map("product_id") @db.Uuid
+
+  quantity        Int
+  purchaseRequest purchase_order_requests @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  product         products                @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([purchaseRequestId, productId])
+}
+
+model User {
+  id                 String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email              String                 @unique @db.VarChar(255)
+  password           String?                @db.VarChar(255)
+  role               user_role              @default(user)
+  emailVerified      DateTime?              @map("email_verified")
+  verificationToken  String?                @map("verification_token")
+  createdAt          DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  name               String                 @map("name") @db.VarChar(255)
+  image              String?                @map("image") @db.VarChar(255)
+  resetPasswordToken reset_password_token[]
+  accounts           Account[]
+  sessions           Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model reset_password_token {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token     String
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  userId    String    @map("user_id") @db.Uuid
+  users     User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model partners {
+  id                   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partnerNameEn        String  @map("partner_name_en") @db.VarChar(255)
+  partnerNameAr        String  @map("partner_name_ar") @db.VarChar(255)
+  partnerDescriptionEn String  @map("partner_description_en")
+  partnerDescriptionAr String  @map("partner_description_ar")
+  logo                 String  @db.VarChar(255)
+  referenceLink        String? @map("reference_link") @db.VarChar(255)
+}
+
+enum user_role {
+  user
+  admin
+}
