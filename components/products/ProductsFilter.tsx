@@ -120,7 +120,7 @@ export default function ProductsFilter({
         {selectedCount > 0 && (
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <span>{t("selectedCount", { count: selectedCount })}</span>
-            <span className="w-2 h-2 rounded-full bg-[#0b8b99] animate-pulse" />
+            
           </div>
         )}
       </div>
