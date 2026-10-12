@@ -28,8 +28,7 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
 
-  const [ featuredProductsRes, bannersRes] = await Promise.all([
-   
+  const [featuredProductsRes, bannersRes] = await Promise.all([
     getFeaturedProductsByLocale(locale),
     getAllBannersByLocale(locale),
   ]);
@@ -42,7 +41,7 @@ export default async function HomePage({
       {banners.length > 0 && <BannerSection banners={banners} />}
       <HeroSection />
       <AboutSection />
-     
+
       {featuredProducts.length > 0 && (
         <FeaturedProductsSection products={featuredProducts} />
       )}

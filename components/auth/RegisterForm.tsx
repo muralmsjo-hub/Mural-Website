@@ -35,9 +35,7 @@ export default function RegisterForm() {
   const onSubmit = async (data: RegisterFormValues) => {
     try {
       const result = await registerAction(data);
-      console.log("data result: ", data);
 
-      console.log("result: ", result);
 
       if (result.success) {
         toast.success(

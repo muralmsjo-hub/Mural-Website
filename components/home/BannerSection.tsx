@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { TranslatedBanner } from "@/server/banner/types";
 import { useTranslations } from "next-intl";
@@ -11,9 +11,54 @@ interface BannerSectionProps {
   banners: TranslatedBanner[];
 }
 
+const AUTOPLAY_INTERVAL = 3000; // 3 seconds per banner
+
 export default function BannerSection({ banners }: BannerSectionProps) {
   const t = useTranslations("Home");
   const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+
+  const total = banners?.length ?? 0;
+
+  const nextBanner = useCallback(() => {
+    if (total <= 1) return;
+    setCurrent((prev) => (prev + 1) % total);
+  }, [total]);
+
+  const prevBanner = useCallback(() => {
+    if (total <= 1) return;
+    setCurrent((prev) => (prev - 1 + total) % total);
+  }, [total]);
+
+  // Autoplay timer
+  useEffect(() => {
+    if (total <= 1 || isPaused) return;
+
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % total);
+    }, AUTOPLAY_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [total, isPaused]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        nextBanner();
+      } else {
+        prevBanner();
+      }
+    }
+    touchStartX.current = null;
+  };
 
   if (!banners || banners.length === 0) {
     return null;
@@ -22,7 +67,13 @@ export default function BannerSection({ banners }: BannerSectionProps) {
   const activeBanner = banners[current] || banners[0];
 
   return (
-    <section className="relative w-full bg-[#062b56] text-white overflow-hidden border-b border-white/10">
+    <section
+      className="relative w-full bg-[#062b56] text-white overflow-hidden border-b border-white/10"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Hero Banner Stage */}
       <div className="relative h-120 sm:h-135 md:h-145 lg:h-155 w-full overflow-hidden">
         {/* Background Image Layer with Smooth Fade Transitions */}
