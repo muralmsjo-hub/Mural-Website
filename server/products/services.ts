@@ -11,6 +11,18 @@ import { updateTag, unstable_cache } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import { generateSlug } from "@/lib/helpers";
 import { PRODUCTS_CACHE_TAG } from "@/lib/constants/allCacheTags";
+import { UTApi } from "uploadthing/server";
+
+const utapi = new UTApi();
+
+function getFileKey(url?: string | null) {
+  if (!url) return null;
+  try {
+    return new URL(url).pathname.split("/f/")[1] || null;
+  } catch {
+    return null;
+  }
+}
 
 export const addNewProduct = async (productData: CreateProductFormType) => {
   try {
@@ -89,6 +101,7 @@ export const updateProduct = async (
     const product = await prisma.products.findUnique({
       where: { id: productId },
     });
+
     if (!product)
       return {
         success: false,
@@ -136,6 +149,50 @@ export const updateProduct = async (
         ...validation.data,
       },
     });
+
+    const newImagesSet = new Set([
+      validation.data.productCardImage,
+      validation.data.manufacturerLogo,
+      ...(Array.isArray(validation.data.productImages)
+        ? validation.data.productImages
+        : []),
+    ]);
+
+    const oldImagesToDelete: string[] = [];
+
+    if (product.productCardImage !== validation.data.productCardImage) {
+      oldImagesToDelete.push(product.productCardImage);
+    }
+
+    if (product.manufacturerLogo !== validation.data.manufacturerLogo) {
+      oldImagesToDelete.push(product.manufacturerLogo);
+    }
+
+    if (Array.isArray(product.productImages)) {
+      for (const img of product.productImages) {
+        if (!validation.data.productImages.includes(img)) {
+          oldImagesToDelete.push(img);
+        }
+      }
+    }
+
+    const fileKeys = Array.from(
+      new Set(
+        oldImagesToDelete
+          .filter((url) => !newImagesSet.has(url))
+          .map(getFileKey)
+          .filter((key): key is string => Boolean(key)),
+      ),
+    );
+
+    if (fileKeys.length) {
+      try {
+        await utapi.deleteFiles(fileKeys.length === 1 ? fileKeys[0] : fileKeys);
+      } catch (err) {
+        console.error("UploadThing delete error:", err);
+      }
+    }
+
     updateTag(PRODUCTS_CACHE_TAG);
     return {
       success: true,
@@ -175,6 +232,22 @@ export const deleteProduct = async (id: string) => {
       where: { id },
     });
 
+    const fileKeys = Array.from(
+      new Set(
+        [
+          getFileKey(existingProduct.productCardImage),
+          getFileKey(existingProduct.manufacturerLogo),
+          ...(Array.isArray(existingProduct.productImages)
+            ? existingProduct.productImages.map(getFileKey)
+            : []),
+        ].filter((key): key is string => Boolean(key)),
+      ),
+    );
+
+    if (fileKeys.length) {
+      await utapi.deleteFiles(fileKeys.length === 1 ? fileKeys[0] : fileKeys);
+    }
+
     updateTag(PRODUCTS_CACHE_TAG);
 
     return {
@@ -203,6 +276,23 @@ export const deleteManyProducts = async (ids: string[]) => {
       };
     }
 
+    const existingProducts = await prisma.products.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    if (existingProducts.length === 0) {
+      return {
+        success: false,
+        message: "PRODUCTS_NOT_FOUND",
+        status: 404,
+        deletedCount: 0,
+      };
+    }
+
     const result = await prisma.products.deleteMany({
       where: {
         id: {
@@ -210,6 +300,33 @@ export const deleteManyProducts = async (ids: string[]) => {
         },
       },
     });
+
+    if (result.count === 0) {
+      return {
+        success: false,
+        message: "PRODUCTS_DELETE_FAILED",
+        status: 400,
+        deletedCount: result.count,
+      };
+    }
+
+    const fileKeys = Array.from(
+      new Set(
+        existingProducts
+          .flatMap((product) => [
+            getFileKey(product.productCardImage),
+            getFileKey(product.manufacturerLogo),
+            ...(Array.isArray(product.productImages)
+              ? product.productImages.map(getFileKey)
+              : []),
+          ])
+          .filter((key): key is string => Boolean(key)),
+      ),
+    );
+
+    if (fileKeys.length) {
+      await utapi.deleteFiles(fileKeys);
+    }
 
     updateTag(PRODUCTS_CACHE_TAG);
     return {
@@ -293,7 +410,9 @@ const getCachedProductsByLocale = (
 ) => {
   const page = filtrationObj.page ?? 1;
   const take = filtrationObj.take ?? 9;
-  const categories = (filtrationObj.categories || []).filter(Boolean) as string[];
+  const categories = (filtrationObj.categories || []).filter(
+    Boolean,
+  ) as string[];
   const category = filtrationObj.category;
 
   const cacheKey = [
@@ -845,7 +964,7 @@ export const getAllProductsByLocale = async (
       data: products,
     };
   } catch (error) {
-    console.error("getAllProductsByLocale error:", error);
+    console.log("getAllProductsByLocale error:", error);
     return {
       success: false,
       message: "INTERNAL_SERVER_ERROR",
@@ -996,8 +1115,6 @@ export const getProductsForSelection = async (locale: Locale = "en") => {
         productNameEn: "asc",
       },
     });
-
-    
 
     const options = products.map((product) => ({
       value: product.id,

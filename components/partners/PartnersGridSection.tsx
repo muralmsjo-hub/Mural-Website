@@ -7,44 +7,47 @@ import { motion } from "motion/react";
 import { ExternalLink, Building2 } from "lucide-react";
 import { PrimaryButton } from "@/components/common";
 import { PartnerItem } from "@/server/partners/types";
+import { Locale } from "@/types";
 
 interface PartnersGridSectionProps {
   partners: PartnerItem[];
+  locale: Locale;
 }
 
-const EASE_EXPO = [0.16, 1, 0.3, 1] as [number, number, number, number];
+const EASE_SMOOTH = [0.25, 0.1, 0.25, 1] as [number, number, number, number];
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2,
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 24, scale: 0.97 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 2,
-      ease: EASE_EXPO,
+      duration: 0.6,
+      ease: EASE_SMOOTH,
     },
   },
 };
 
 export function PartnersGridSection({
   partners = [],
+  locale,
 }: PartnersGridSectionProps) {
   const t = useTranslations("PartnersPage.Grid");
-
+  const isAr = locale === "ar";
   if (!partners || partners.length === 0) {
     return (
-      <section className="py-20 bg-slate-50 min-h-[400px] flex items-center justify-center">
+      <section className="py-20 bg-slate-50 min-h-100 flex items-center justify-center">
         <div className="text-center p-8 rounded-2xl bg-white border border-slate-200 max-w-md mx-auto shadow-xs">
           <Building2 className="w-12 h-12 text-[#0b8b99] mx-auto mb-3" />
           <h3 className="text-lg font-bold text-[#062b56]">
@@ -73,17 +76,19 @@ export function PartnersGridSection({
               <motion.div
                 key={partner.id}
                 variants={itemVariants}
-                className="group relative rounded-2xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm hover:shadow-xl hover:border-[#0b8b99]/40 transition-all duration-300 flex flex-col justify-between items-center text-center"
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.3, ease: EASE_SMOOTH }}
+                className="group relative rounded-2xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-xs hover:shadow-xl hover:border-[#0b8b99]/40 transition-colors duration-300 flex flex-col justify-between items-center text-center will-change-transform"
               >
                 <div className="w-full flex flex-col items-center">
                   {/* Full-width Image Container */}
-                  <div className="relative w-full h-36 bg-slate-50/70  rounded-xl  mb-6 flex items-center justify-center overflow-hidden">
+                  <div className="relative w-full h-36 bg-slate-50/70 rounded-xl mb-6 flex items-center justify-center overflow-hidden">
                     {partner.logo ? (
                       <Image
                         src={partner.logo}
                         alt={partner.name}
                         fill
-                        className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+                        className="object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     ) : (
@@ -114,7 +119,11 @@ export function PartnersGridSection({
                       rel="noopener noreferrer"
                       fullWidth
                       size="md"
-                      icon={<ExternalLink className="w-4 h-4 rtl:rotate-180" />}
+                      icon={
+                        <ExternalLink
+                          className={`w-4 h-4 ${isAr ? "rotate-270" : ""}`}
+                        />
+                      }
                     >
                       {t("visitWebsite")}
                     </PrimaryButton>

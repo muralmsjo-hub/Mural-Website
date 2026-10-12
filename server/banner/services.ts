@@ -162,6 +162,8 @@ export const deleteBanner = async (id: string) => {
 
 export const deleteManyBanner = async (ids: string[]) => {
   try {
+    console.log(" i am in test banner");
+
     if (!ids.length) {
       return {
         success: false,
@@ -178,6 +180,7 @@ export const deleteManyBanner = async (ids: string[]) => {
         },
       },
     });
+    console.log(" i am in test existingBanners");
 
     if (existingBanners.length === 0) {
       return {
@@ -204,6 +207,8 @@ export const deleteManyBanner = async (ids: string[]) => {
         deletedCount: result.count,
       };
     }
+
+    console.log("result.count ", result.count);
 
     const fileKeys = existingBanners
       .map((banner) => getFileKey(banner.image))

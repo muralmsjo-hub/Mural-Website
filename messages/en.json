@@ -486,7 +486,8 @@
       "allCategories": "All categories",
       "clearAll": "Clear filters",
       "selectedCount": "{count} selected",
-      "searchPlaceholder": "Search categories..."
+      "searchPlaceholder": "Search categories...",
+      "noCategories":"No categories available"
     },
     "Grid": {
       "showingCount": "Showing {count} medical products",

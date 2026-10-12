@@ -1,13 +1,10 @@
-import React from "react";
 import { Locale } from "@/types";
-import { getAllCategoriesByLocale } from "@/server/categories/services";
 import { getFeaturedProductsByLocale } from "@/server/products/services";
 import { getAllBannersByLocale } from "@/server/banner/services";
 import { generateStaticMetadata } from "@/lib/constants/metadata";
 import {
   HeroSection,
   AboutSection,
-  CategoriesSection,
   FeaturedProductsSection,
   WhyMuralSection,
   PurchaseRequestCTA,
@@ -31,23 +28,24 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
 
-  const [categoriesRes, featuredProductsRes, bannersRes] = await Promise.all([
-    getAllCategoriesByLocale(locale),
+  const [ featuredProductsRes, bannersRes] = await Promise.all([
+   
     getFeaturedProductsByLocale(locale),
     getAllBannersByLocale(locale),
   ]);
 
-  const categories = categoriesRes?.categories || [];
   const featuredProducts = featuredProductsRes?.data || [];
-  const banners = bannersRes.banners || [];
+  const banners = bannersRes?.banners || [];
 
   return (
     <main className="flex flex-col w-full min-h-screen">
-      <BannerSection banners={banners} />
+      {banners.length > 0 && <BannerSection banners={banners} />}
       <HeroSection />
       <AboutSection />
-      {/* <CategoriesSection categories={categories} />*/}
-      <FeaturedProductsSection products={featuredProducts} />
+     
+      {featuredProducts.length > 0 && (
+        <FeaturedProductsSection products={featuredProducts} />
+      )}
       <WhyMuralSection />
       <PurchaseRequestCTA />
       <ContactCTA />

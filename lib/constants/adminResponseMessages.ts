@@ -41,6 +41,8 @@ export const RESPONSE_MESSAGES: Record<string, string> = {
   PRODUCT_DELETED_SUCCESSFULLY: "Product deleted successfully.",
   PRODUCT_NAME_ALREADY_EXISTS: "A product with this name already exists.",
   PRODUCT_NOT_FOUND: "The product could not be found.",
+  PRODUCTS_NOT_FOUND: "No products found to delete.",
+  PRODUCTS_DELETE_FAILED: "Failed to delete products.",
   PRODUCT_ID_REQUIRED: "Product ID is required.",
   PRODUCTS_IDS_REQUIRED: "At least one product must be selected.",
   MAXIMUM_FEATURED_PRODUCTS_REACHED:

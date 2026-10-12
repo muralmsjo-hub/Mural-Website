@@ -1,7 +1,10 @@
 import React from "react";
 import { Locale } from "@/types";
 import { getAllPartnersByLocale } from "@/server/partners/services";
-import { PartnersHeroSection, PartnersGridSection } from "@/components/partners";
+import {
+  PartnersHeroSection,
+  PartnersGridSection,
+} from "@/components/partners";
 
 import { generateStaticMetadata } from "@/lib/constants/metadata";
 
@@ -28,7 +31,7 @@ export default async function PartnersPage({
   return (
     <main className="w-full min-h-screen">
       <PartnersHeroSection />
-      <PartnersGridSection partners={partners} />
+      <PartnersGridSection partners={partners} locale={locale} />
     </main>
   );
 }

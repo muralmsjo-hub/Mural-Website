@@ -46,6 +46,13 @@ function MediaSection() {
             endpoint="banners"
             onUploadComplete={handleUploadComplete}
             onUploadError={handleUploadError}
+            onDelete={() =>
+              setValue("image", "", {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true,
+              })
+            }
           />
 
           {errors.image && (

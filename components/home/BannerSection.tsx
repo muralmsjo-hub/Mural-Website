@@ -15,6 +15,10 @@ export default function BannerSection({ banners }: BannerSectionProps) {
   const t = useTranslations("Home");
   const [current, setCurrent] = useState(0);
 
+  if (!banners || banners.length === 0) {
+    return null;
+  }
+
   const activeBanner = banners[current] || banners[0];
 
   return (

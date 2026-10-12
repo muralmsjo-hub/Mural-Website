@@ -79,14 +79,17 @@ export default function ProductsClientContainer({
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Sidebar Filter (3 cols on desktop) */}
+
           <div className="lg:col-span-3 w-full">
-            <ProductsFilter
-              categories={categories}
-              selectedCategoryIds={selectedCategoryIds}
-              onToggleCategory={handleToggleCategory}
-              onClearFilters={handleClearFilters}
-              isPending={isPending}
-            />
+            {categories.length > 0 && (
+              <ProductsFilter
+                categories={categories}
+                selectedCategoryIds={selectedCategoryIds}
+                onToggleCategory={handleToggleCategory}
+                onClearFilters={handleClearFilters}
+                isPending={isPending}
+              />
+            )}
           </div>
 
           {/* Right Main Content (9 cols on desktop) */}

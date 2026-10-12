@@ -80,7 +80,7 @@ export default function ProductsFilter({
         </div>
 
         {/* Categories Checkboxes List */}
-        <div className="space-y-2 max-h-[440px] overflow-y-auto pr-1 rtl:pl-1">
+        <div className="space-y-2 max-h-110 overflow-y-auto pr-1 rtl:pl-1">
           {categories.length > 0 ? (
             categories.map((cat) => {
               const isChecked = selectedCategoryIds.includes(cat.id);
@@ -101,7 +101,7 @@ export default function ProductsFilter({
                         : "bg-white border-slate-300"
                     }`}
                   >
-                    {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                    {isChecked && <Check className="w-3 h-3 stroke-3" />}
                   </div>
                   <span className="text-xs sm:text-sm leading-tight flex-1 line-clamp-1">
                     {cat.name}
@@ -111,7 +111,7 @@ export default function ProductsFilter({
             })
           ) : (
             <div className="py-6 text-center text-xs text-slate-400">
-              No categories available
+             {t("noCategories")}
             </div>
           )}
         </div>

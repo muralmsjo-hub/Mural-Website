@@ -67,6 +67,13 @@ function ManufacturerSection() {
             endpoint="products"
             onUploadComplete={handleUploadComplete}
             onUploadError={handleUploadError}
+            onDelete={() =>
+              setValue("manufacturerLogo", "", {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true,
+              })
+            }
           />
 
           {errors.manufacturerLogo && (

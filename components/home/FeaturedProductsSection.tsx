@@ -27,6 +27,10 @@ export default function FeaturedProductsSection({
 }: FeaturedProductsSectionProps) {
   const t = useTranslations("HomePage.FeaturedProducts");
 
+  if (!products || products.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16 sm:py-24 bg-[#f0fafb] border-y border-teal-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">

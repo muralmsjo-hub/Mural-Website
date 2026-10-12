@@ -33,7 +33,7 @@ export default async function AboutPage({
     <main className="flex flex-col w-full min-h-screen">
       <AboutHeroSection />
       <WhatWeDoSection />
-      <OurPartnersSection partners={partners} />
+      {partners.length > 0 && <OurPartnersSection partners={partners} />}
       <MissionVisionValuesSection />
       <ContactFormSection locale={locale}/>
     </main>

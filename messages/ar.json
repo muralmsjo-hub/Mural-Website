@@ -485,7 +485,8 @@
       "allCategories": "جميع الفئات",
       "clearAll": "مسح الفلاتر",
       "selectedCount": "تم تحديد {count}",
-      "searchPlaceholder": "البحث في الفئات..."
+      "searchPlaceholder": "البحث في الفئات...",
+      "noCategories":"لا تتوفر فئات حالياً."
     },
     "Grid": {
       "showingCount": "عرض {count} منتجات طبية",
